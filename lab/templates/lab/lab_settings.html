@@ -1,0 +1,200 @@
+{% extends 'lab/base.html' %}
+{% load lab_tags %}
+{% block title %}Lab Settings{% endblock %}
+{% block page_title %}Lab Settings & Branding{% endblock %}
+{% block content %}
+<form method="post" action="{% url 'lab_settings_save' %}" enctype="multipart/form-data">
+{% csrf_token %}
+<div class="grid2" style="align-items:start">
+  <!-- Left: Text settings -->
+  <div>
+    <div class="fpanel">
+      <div class="fpanel-hd"><div class="fpanel-title">🏷️ Lab Identity</div></div>
+      <div class="fpanel-body">
+        <div class="fg"><label class="fl">Lab Name</label><input class="fc" name="lab_name" value="{{ settings.lab_name }}"></div>
+        <div class="fg"><label class="fl">Tagline / ISO Badge text</label><input class="fc" name="tagline" value="{{ settings.tagline }}"></div>
+        <div class="fg"><label class="fl">Unit Text</label><input class="fc" name="unit_text" value="{{ settings.unit_text }}"></div>
+        <div class="fg"><label class="fl">Email</label><input class="fc" name="email" type="email" value="{{ settings.email }}"></div>
+        <div class="fg"><label class="fl">Phone</label><input class="fc" name="phone" value="{{ settings.phone }}"></div>
+        <div class="fg"><label class="fl">Address</label><textarea class="fc" name="address" rows="3">{{ settings.address }}</textarea></div>
+      </div>
+    </div>
+
+    <div class="fpanel">
+      <div class="fpanel-hd"><div class="fpanel-title">📄 PDF Footer</div></div>
+      <div class="fpanel-body">
+        <div class="fg"><label class="fl">Footer Note Text</label><textarea class="fc" name="pdf_footer_text" rows="4">{{ settings.pdf_footer_text }}</textarea></div>
+        <div class="fg">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--txt)">
+            <input type="checkbox" name="show_timing_bar" {% if settings.show_timing_bar %}checked{% endif %} style="accent-color:var(--teal);width:14px;height:14px">
+            Show timing bar in PDF
+          </label>
+        </div>
+        <div class="fg"><label class="fl">Timing Bar Text</label><input class="fc" name="timing_text" value="{{ settings.timing_text }}"></div>
+        <div class="fg"><label class="fl">Facilities Text</label><textarea class="fc" name="facilities_text" rows="2">{{ settings.facilities_text }}</textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Image uploads -->
+  <div>
+    <div class="fpanel">
+      <div class="fpanel-hd"><div class="fpanel-title">🖼️ Logo & Letterhead</div></div>
+      <div class="fpanel-body">
+        <div class="fg">
+          <label class="fl">Lab Logo</label>
+          {% if settings.logo_image %}<img src="{{ settings.logo_image.url }}" style="height:50px;display:block;margin-bottom:6px;border-radius:6px"><label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt2)"><input type="checkbox" name="clear_logo_image"> Remove current logo</label>{% endif %}
+          <input class="fc" type="file" name="logo_image" accept="image/*" style="margin-top:5px">
+          <div style="font-size:10px;color:var(--txt3);margin-top:3px">Shown in PDF header. Upload PNG/JPG with transparent background.</div>
+        </div>
+        <div class="fg">
+          <label class="fl">Header Image (Custom)</label>
+          {% if settings.letterhead_image %}<img src="{{ settings.letterhead_image.url }}" style="width:100%;max-height:80px;object-fit:cover;display:block;margin-bottom:6px;border-radius:6px;border:1px solid var(--border)"><label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt2)"><input type="checkbox" name="clear_letterhead_image"> Remove header image</label>{% endif %}
+          <input class="fc" type="file" name="letterhead_image" accept="image/*" style="margin-top:5px">
+          <div style="font-size:10px;color:var(--txt3);margin-top:3px">Custom PDF header image. If uploaded, replaces the top header section in PDF only.</div>
+        </div>
+        <div class="fg">
+          <label class="fl">PDF Footer Image / Stamp</label>
+          {% if settings.pdf_footer_image %}<img src="{{ settings.pdf_footer_image.url }}" style="height:40px;display:block;margin-bottom:6px"><label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt2)"><input type="checkbox" name="clear_pdf_footer_image"> Remove footer image</label>{% endif %}
+          <input class="fc" type="file" name="pdf_footer_image" accept="image/*" style="margin-top:5px">
+        </div>
+      </div>
+    </div>
+
+    <div class="fpanel">
+      <div class="fpanel-hd"><div class="fpanel-title">✍️ Signatures</div></div>
+      <div class="fpanel-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          {% for sig_field, sig_name in sig_fields %}
+          <div class="fg">
+            <label class="fl">{{ sig_name }}</label>
+            {% with sig_val=settings|get_attr:sig_field %}
+            {% if sig_val %}<img src="{{ sig_val.url }}" style="height:36px;display:block;margin-bottom:4px;border:1px solid var(--border);border-radius:4px"><label style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--txt2)"><input type="checkbox" name="clear_{{ sig_field }}"> Remove</label>{% endif %}
+            {% endwith %}
+            <input class="fc" type="file" name="{{ sig_field }}" accept="image/*" style="margin-top:4px">
+          </div>
+          {% endfor %}
+        </div>
+        <div style="font-size:10px;color:var(--txt3);margin-top:6px">Upload signature images (PNG with white or transparent background). Shown above doctor names in PDF.</div>
+      </div>
+    </div>
+
+    <div class="fpanel">
+      <div class="fpanel-hd"><div class="fpanel-title">👨‍⚕️ Technician / Staff Names</div></div>
+      <div class="fpanel-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fg"><label class="fl">Staff 1 — Name</label><input class="fc" name="signer1_name" value="{{ settings.signer1_name }}"></div>
+          <div class="fg"><label class="fl">Staff 1 — Designation</label><textarea class="fc" name="signer1_qual" rows="2">{{ settings.signer1_qual }}</textarea></div>
+          <div class="fg"><label class="fl">Staff 2 — Name</label><input class="fc" name="signer2_name" value="{{ settings.signer2_name }}"></div>
+          <div class="fg"><label class="fl">Staff 2 — Designation</label><textarea class="fc" name="signer2_qual" rows="2">{{ settings.signer2_qual }}</textarea></div>
+          <div class="fg"><label class="fl">Staff 3 — Name</label><input class="fc" name="signer3_name" value="{{ settings.signer3_name }}"></div>
+          <div class="fg"><label class="fl">Staff 3 — Designation</label><textarea class="fc" name="signer3_qual" rows="2">{{ settings.signer3_qual }}</textarea></div>
+          <div class="fg"><label class="fl">Staff 4 — Name</label><input class="fc" name="signer4_name" value="{{ settings.signer4_name }}"></div>
+          <div class="fg"><label class="fl">Staff 4 — Designation</label><textarea class="fc" name="signer4_qual" rows="2">{{ settings.signer4_qual }}</textarea></div>
+        </div>
+        <div style="font-size:10px;color:var(--txt3);margin-top:6px">Yahan likhe naam PDF reports mein footer mein dikhenge.</div>
+      </div>
+    </div>
+
+    <div class="fpanel">
+      <div class="fpanel-hd"><div class="fpanel-title">🖼️ Footer Image (Custom)</div></div>
+      <div class="fpanel-body">
+        <div class="fg">
+          <label class="fl">Footer Letterhead Image</label>
+          {% if settings.footer_image %}<img src="{{ settings.footer_image.url }}" style="width:100%;max-height:80px;object-fit:cover;display:block;margin-bottom:6px;border-radius:6px;border:1px solid var(--border)"><label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt2)"><input type="checkbox" name="clear_footer_image"> Remove footer image</label>{% endif %}
+          <input class="fc" type="file" name="footer_image" accept="image/*" style="margin-top:5px">
+          <div style="font-size:10px;color:var(--txt3);margin-top:3px">Custom PDF footer image. Agar upload karein to PDF ke neeche dikhega.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Margin Settings ─────────────────────────────────────── -->
+<div class="card mb4" style="margin-top:14px">
+  <div class="card-hd"><div class="card-title">🖨️ Print &amp; PDF Margin Settings</div><div class="card-sub">Top / Right / Bottom / Left — in pixels (px). Increase top/bottom if your letterhead paper needs space.</div></div>
+  <div style="padding:16px 20px">
+
+    <!-- Single Report -->
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;font-weight:800;color:var(--teal);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px">Single Report</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:8px">🖨️ Print Margin</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div><label class="fl" style="font-size:10px">Top (px)</label><input class="fc" type="number" min="0" max="500" name="print_single_margin_top"    value="{{ settings.print_single_margin_top }}"></div>
+            <div><label class="fl" style="font-size:10px">Bottom (px)</label><input class="fc" type="number" min="0" max="500" name="print_single_margin_bottom" value="{{ settings.print_single_margin_bottom }}"></div>
+            <div><label class="fl" style="font-size:10px">Left (px)</label><input class="fc" type="number" min="0" max="200" name="print_single_margin_left"   value="{{ settings.print_single_margin_left }}"></div>
+            <div><label class="fl" style="font-size:10px">Right (px)</label><input class="fc" type="number" min="0" max="200" name="print_single_margin_right"  value="{{ settings.print_single_margin_right }}"></div>
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:8px">📄 PDF Margin</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div><label class="fl" style="font-size:10px">Top (px)</label><input class="fc" type="number" min="0" max="500" name="pdf_single_margin_top"      value="{{ settings.pdf_single_margin_top }}"></div>
+            <div><label class="fl" style="font-size:10px">Bottom (px)</label><input class="fc" type="number" min="0" max="500" name="pdf_single_margin_bottom"   value="{{ settings.pdf_single_margin_bottom }}"></div>
+            <div><label class="fl" style="font-size:10px">Left (px)</label><input class="fc" type="number" min="0" max="200" name="pdf_single_margin_left"     value="{{ settings.pdf_single_margin_left }}"></div>
+            <div><label class="fl" style="font-size:10px">Right (px)</label><input class="fc" type="number" min="0" max="200" name="pdf_single_margin_right"    value="{{ settings.pdf_single_margin_right }}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Report -->
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;font-weight:800;color:var(--teal);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px">Bulk Report</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:8px">🖨️ Print Margin</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div><label class="fl" style="font-size:10px">Top (px)</label><input class="fc" type="number" min="0" max="500" name="print_bulk_margin_top"      value="{{ settings.print_bulk_margin_top }}"></div>
+            <div><label class="fl" style="font-size:10px">Bottom (px)</label><input class="fc" type="number" min="0" max="500" name="print_bulk_margin_bottom"   value="{{ settings.print_bulk_margin_bottom }}"></div>
+            <div><label class="fl" style="font-size:10px">Left (px)</label><input class="fc" type="number" min="0" max="200" name="print_bulk_margin_left"     value="{{ settings.print_bulk_margin_left }}"></div>
+            <div><label class="fl" style="font-size:10px">Right (px)</label><input class="fc" type="number" min="0" max="200" name="print_bulk_margin_right"    value="{{ settings.print_bulk_margin_right }}"></div>
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:8px">📄 PDF Margin</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div><label class="fl" style="font-size:10px">Top (px)</label><input class="fc" type="number" min="0" max="500" name="pdf_bulk_margin_top"        value="{{ settings.pdf_bulk_margin_top }}"></div>
+            <div><label class="fl" style="font-size:10px">Bottom (px)</label><input class="fc" type="number" min="0" max="500" name="pdf_bulk_margin_bottom"     value="{{ settings.pdf_bulk_margin_bottom }}"></div>
+            <div><label class="fl" style="font-size:10px">Left (px)</label><input class="fc" type="number" min="0" max="200" name="pdf_bulk_margin_left"       value="{{ settings.pdf_bulk_margin_left }}"></div>
+            <div><label class="fl" style="font-size:10px">Right (px)</label><input class="fc" type="number" min="0" max="200" name="pdf_bulk_margin_right"      value="{{ settings.pdf_bulk_margin_right }}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bill -->
+    <div>
+      <div style="font-size:11px;font-weight:800;color:var(--teal);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px">Bill / Receipt</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:8px">🖨️ Print Margin</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div><label class="fl" style="font-size:10px">Top (px)</label><input class="fc" type="number" min="0" max="500" name="print_bill_margin_top"      value="{{ settings.print_bill_margin_top }}"></div>
+            <div><label class="fl" style="font-size:10px">Bottom (px)</label><input class="fc" type="number" min="0" max="500" name="print_bill_margin_bottom"   value="{{ settings.print_bill_margin_bottom }}"></div>
+            <div><label class="fl" style="font-size:10px">Left (px)</label><input class="fc" type="number" min="0" max="200" name="print_bill_margin_left"     value="{{ settings.print_bill_margin_left }}"></div>
+            <div><label class="fl" style="font-size:10px">Right (px)</label><input class="fc" type="number" min="0" max="200" name="print_bill_margin_right"    value="{{ settings.print_bill_margin_right }}"></div>
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:8px">📄 PDF Margin</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div><label class="fl" style="font-size:10px">Top (px)</label><input class="fc" type="number" min="0" max="500" name="pdf_bill_margin_top"        value="{{ settings.pdf_bill_margin_top }}"></div>
+            <div><label class="fl" style="font-size:10px">Bottom (px)</label><input class="fc" type="number" min="0" max="500" name="pdf_bill_margin_bottom"     value="{{ settings.pdf_bill_margin_bottom }}"></div>
+            <div><label class="fl" style="font-size:10px">Left (px)</label><input class="fc" type="number" min="0" max="200" name="pdf_bill_margin_left"       value="{{ settings.pdf_bill_margin_left }}"></div>
+            <div><label class="fl" style="font-size:10px">Right (px)</label><input class="fc" type="number" min="0" max="200" name="pdf_bill_margin_right"      value="{{ settings.pdf_bill_margin_right }}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+  <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+  <button type="submit" class="btn btn-primary">💾 Save All Settings</button>
+</div>
+</form>
+{% endblock %}

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>IPL Assistant</title>
+<style>
+[data-theme="dark"]{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--surface:#21262d;--border:#30363d;--teal:#00b8a9;--teal-d:#009688;--teal-glow:rgba(0,184,169,0.15);--blue:#388bfd;--txt:#e6edf3;--txt2:#8b949e;--txt3:#484f58;--user-bg:#1a3a5c;--user-border:#1d4a7a;--bot-bg:#1c2128;--shadow:0 4px 20px rgba(0,0,0,0.4);}
+[data-theme="light"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#f0f2f5;--surface:#eaeef2;--border:#d0d7de;--teal:#008f85;--teal-d:#007068;--teal-glow:rgba(0,143,133,0.1);--blue:#0969da;--txt:#1f2328;--txt2:#636c76;--txt3:#9198a1;--user-bg:#dbeafe;--user-border:#93c5fd;--bot-bg:#ffffff;--shadow:0 4px 20px rgba(0,0,0,0.08);}
+[data-theme="midnight"]{--bg:#070b14;--bg2:#0d1526;--bg3:#111e35;--surface:#162240;--border:#1e304d;--teal:#00d4c8;--teal-d:#00a89e;--teal-glow:rgba(0,212,200,0.15);--blue:#4d9fff;--txt:#e8eef8;--txt2:#7a8ba8;--txt3:#3a4a65;--user-bg:#0d2545;--user-border:#1a3f6e;--bot-bg:#0d1526;--shadow:0 4px 24px rgba(0,0,0,0.6);}
+[data-theme="forest"]{--bg:#0a1208;--bg2:#0f1c0c;--bg3:#142210;--surface:#1a2e14;--border:#253d1c;--teal:#4caf50;--teal-d:#388e3c;--teal-glow:rgba(76,175,80,0.15);--blue:#81c784;--txt:#e8f5e9;--txt2:#81a678;--txt3:#4a6b45;--user-bg:#1b3a1c;--user-border:#2e5c2e;--bot-bg:#0f1c0c;--shadow:0 4px 20px rgba(0,0,0,0.5);}
+[data-theme="sunset"]{--bg:#1a0a00;--bg2:#261200;--bg3:#301800;--surface:#3d2000;--border:#522c00;--teal:#ff7043;--teal-d:#e64a19;--teal-glow:rgba(255,112,67,0.15);--blue:#ffab40;--txt:#fff3e0;--txt2:#bcaaa4;--txt3:#7d5a4f;--user-bg:#3e1f00;--user-border:#5d3000;--bot-bg:#261200;--shadow:0 4px 20px rgba(0,0,0,0.5);}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;height:-webkit-fill-available;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);display:flex;flex-direction:column;height:100vh;height:-webkit-fill-available;overflow:hidden;transition:background .3s,color .3s;}
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;position:relative;z-index:10;}
+.hdr-icon{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.hdr-title{font-size:14px;font-weight:700;color:var(--txt);}
+.hdr-sub{font-size:10px;color:var(--txt2);margin-top:1px;}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.status{display:flex;align-items:center;gap:4px;}
+.status-dot{width:7px;height:7px;background:#3fb950;border-radius:50%;}
+.status-lbl{font-size:10px;color:#3fb950;font-weight:600;}
+.theme-btn{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:5px 9px;color:var(--txt2);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:4px;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.theme-btn:hover{border-color:var(--teal);color:var(--teal);}
+.theme-dropdown{position:absolute;top:58px;right:14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:6px;z-index:200;box-shadow:var(--shadow);min-width:168px;display:none;}
+.theme-dropdown.open{display:block;}
+.theme-opt{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--txt2);transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.theme-opt:hover,.theme-opt.active{background:var(--surface);color:var(--teal);}
+.t-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.chat-area{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 12px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch;}
+.chat-area::-webkit-scrollbar{width:3px;}
+.chat-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.msg{display:flex;gap:8px;animation:fadeUp .22s ease;max-width:93%;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.msg.bot{align-self:flex-start;}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.msg-av{width:28px;height:28px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.bot .msg-av{background:linear-gradient(135deg,var(--teal),var(--blue));}
+.user .msg-av{background:var(--surface);}
+.msg-bubble{padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.65;word-break:break-word;}
+.bot .msg-bubble{background:var(--bot-bg);border:1px solid var(--border);border-top-left-radius:3px;}
+.user .msg-bubble{background:var(--user-bg);border:1px solid var(--user-border);border-top-right-radius:3px;}
+.msg-bubble strong{color:var(--teal);font-weight:600;}
+.msg-bubble ul{margin:5px 0 3px 16px;}
+.msg-bubble li{margin-bottom:2px;}
+.msg-bubble .tag{display:inline-block;background:var(--teal-glow);color:var(--teal);border:1px solid rgba(0,184,169,.3);padding:1px 7px;border-radius:4px;font-size:11px;font-weight:600;margin:1px 2px;}
+.msg-bubble .url{color:var(--blue);font-family:monospace;font-size:11px;background:rgba(56,139,253,.08);padding:1px 5px;border-radius:3px;}
+.msg-bubble table{width:100%;border-collapse:collapse;margin-top:6px;font-size:11px;}
+.msg-bubble td,.msg-bubble th{padding:4px 7px;border:1px solid var(--border);}
+.msg-bubble th{background:var(--surface);color:var(--teal);font-weight:600;}
+.typing-wrap{display:flex;gap:8px;align-self:flex-start;}
+.typing{display:flex;gap:4px;padding:10px 13px;background:var(--bot-bg);border:1px solid var(--border);border-radius:12px;border-top-left-radius:3px;}
+.typing span{width:6px;height:6px;background:var(--txt3);border-radius:50%;animation:bounce .9s infinite;}
+.typing span:nth-child(2){animation-delay:.15s;}
+.typing span:nth-child(3){animation-delay:.3s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+.suggestions{padding:6px 12px 8px;display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0;}
+.sug-btn{padding:6px 12px;background:var(--surface);border:1px solid var(--border);border-radius:20px;color:var(--txt2);font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
+.sug-btn:active{border-color:var(--teal);color:var(--teal);background:var(--teal-glow);}
+.input-wrap{flex-shrink:0;background:var(--bg2);border-top:1px solid var(--border);padding:10px 12px;padding-bottom:max(12px,env(safe-area-inset-bottom));display:flex;align-items:flex-end;gap:8px;}
+.input-box{flex:1;background:var(--bg3);border:1.5px solid var(--border);border-radius:22px;padding:10px 16px;color:var(--txt);font-family:inherit;font-size:15px;resize:none;outline:none;min-height:44px;max-height:120px;line-height:1.5;transition:border .2s;-webkit-appearance:none;display:block;}
+.input-box:focus{border-color:var(--teal);}
+.input-box::placeholder{color:var(--txt3);}
+.send-btn{width:44px;height:44px;background:var(--teal);border:none;border-radius:50%;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.send-btn:active{transform:scale(0.92);background:var(--teal-d);}
+.send-btn svg{width:18px;height:18px;color:#fff;margin-left:2px;}
+.back-btn{width:34px;height:34px;border-radius:8px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--txt2);flex-shrink:0;text-decoration:none;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.back-btn:hover,.back-btn:active{background:var(--teal-glow);border-color:var(--teal);color:var(--teal);text-decoration:none;}
+.back-btn svg{width:16px;height:16px;}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/dashboard/" class="back-btn" title="Back to Dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+  </a>
+  <div class="hdr-icon">🔬</div>
+  <div><div class="hdr-title">IPL Assistant</div><div class="hdr-sub">Indian Path-Lab — LMS Help Bot</div></div>
+  <div class="hdr-right">
+    <div class="status"><div class="status-dot"></div><span class="status-lbl">Offline</span></div>
+  </div>
+</div>
+<div class="chat-area" id="chatArea"></div>
+<div class="suggestions" id="suggestions"></div>
+<div class="input-wrap">
+  <textarea class="input-box" id="inputBox" placeholder="Type your question here..." rows="1"></textarea>
+  <button class="send-btn" onclick="sendMsg()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+  </button>
+</div>
+<script>
+const HINDI=['kaise','kya','karo','kare','karta','batao','chahiye','nahi','nai','hai','hain','hoga','mein','pe','se','ko','ka','ki','ke','aur','par','bhi','sab','kyun','kab','yaha','mujhe','hum','apna','dena','lena','nikalo','daalo','bharo','kholna','chalu','theek','samajh','dekho'];
+function detectLang(t){const w=t.toLowerCase().split(/\s+/);let h=0;for(const x of w)if(HINDI.some(d=>x.includes(d)))h++;return h/w.length>0.3?'hi':'en';}
+
+const KB=[
+  {tags:['login','signin','password','username','kaise login'],en:`<strong>How to Login:</strong><br>1. Open <span class="url">127.0.0.1:8000</span><br>2. Enter Username & Password<br>3. Click <strong>Sign In</strong><br><br><strong>Demo Accounts:</strong><table><tr><th>Role</th><th>User</th><th>Pass</th></tr><tr><td>Admin</td><td>admin</td><td>Admin@1234</td></tr><tr><td>Staff</td><td>staff</td><td>Staff@1234</td></tr><tr><td>Doctor</td><td>doctor</td><td>Doctor@1234</td></tr></table>`,hi:`<strong>Login Kaise Kare:</strong><br>1. <span class="url">127.0.0.1:8000</span> kholo<br>2. Username & Password daalo<br>3. <strong>Sign In</strong> dabao<br><br><strong>Demo Accounts:</strong><table><tr><th>Role</th><th>User</th><th>Pass</th></tr><tr><td>Admin</td><td>admin</td><td>Admin@1234</td></tr><tr><td>Staff</td><td>staff</td><td>Staff@1234</td></tr><tr><td>Doctor</td><td>doctor</td><td>Doctor@1234</td></tr></table>`,se:['How to logout?','User roles?'],sh:['Logout kaise?','User roles kya hain?']},
+  {tags:['logout','exit','bahar','sign out'],en:`<strong>Logout:</strong> Click the → button at the <strong>bottom of sidebar</strong>.`,hi:`<strong>Logout:</strong> Sidebar ke <strong>sabse neeche</strong> → button dabao.`,se:['Login?','User roles?'],sh:['Login kaise?','User roles kya hain?']},
+  {tags:['role','roles','admin','staff','doctor','patient','permission'],en:`<strong>4 User Roles:</strong><br><span class="tag">Admin</span> Full access<br><span class="tag">Staff</span> Booking & reports<br><span class="tag">Doctor</span> View reports only<br><span class="tag">Patient</span> Own reports only`,hi:`<strong>4 User Roles:</strong><br><span class="tag">Admin</span> Poora access<br><span class="tag">Staff</span> Booking & reports<br><span class="tag">Doctor</span> Sirf reports dekhe<br><span class="tag">Patient</span> Sirf apni reports`,se:['Add new user?','Patient portal?'],sh:['Naya user kaise?','Patient portal kya hai?']},
+  {tags:['booking','book','naya booking','new booking','appointment','receipt','buk'],en:`<strong>New Booking Steps:</strong><br><strong>1.</strong> Sidebar → New Booking<br><strong>2.</strong> Select / add patient<br><strong>3.</strong> Select tests<br><strong>4.</strong> Referring Doctor (optional)<br><strong>5.</strong> Payment details<br><strong>6.</strong> Save Booking<br><br>Receipt ID auto: <span class="tag">RCP-2026-0001</span>`,hi:`<strong>Naya Booking Steps:</strong><br><strong>1.</strong> Sidebar → New Booking<br><strong>2.</strong> Patient select/add karo<br><strong>3.</strong> Tests select karo<br><strong>4.</strong> Referring Doctor (optional)<br><strong>5.</strong> Payment details<br><strong>6.</strong> Save Booking<br><br>Receipt ID auto: <span class="tag">RCP-2026-0001</span>`,se:['Print bill?','Booking status?','Discount?'],sh:['Bill kaise nikale?','Status kaise change kare?','Discount kaise lagaye?']},
+  {tags:['bill','receipt','invoice','billing'],en:`<strong>Bill PDF:</strong> Booking Detail → <strong>Bill PDF</strong> or <strong>Print Bill</strong> button.`,hi:`<strong>Bill PDF:</strong> Booking detail → <strong>Bill PDF</strong> ya <strong>Print Bill</strong> dabao.`,se:['Apply discount?','Create booking?'],sh:['Discount kaise?','Booking kaise?']},
+  {tags:['discount','referral','chhoot'],en:`<strong>Discount:</strong> In booking form — <span class="tag">Discount %</span> for direct discount, <span class="tag">Referral %</span> for doctor commission. Total auto-calculates.`,hi:`<strong>Discount:</strong> Booking form mein — <span class="tag">Discount %</span> direct chhoot, <span class="tag">Referral %</span> doctor commission. Total auto-calculate hoga.`,se:['Print bill?','Create booking?'],sh:['Bill?','Booking?']},
+  {tags:['patient','mareez','add patient','naya patient'],en:`<strong>Add Patient:</strong><br>Sidebar → Patients → + Add Patient<br>Or directly from New Booking.<br><br>Fields: Name, Age, Gender, Mobile, Blood Group, Priority etc.<br>ID auto: <span class="tag">IPL-0001</span>`,hi:`<strong>Patient Add Karo:</strong><br>Sidebar → Patients → + Add Patient<br>Ya New Booking ke waqt directly.<br><br>Fields: Naam, Age, Gender, Mobile, Blood Group, Priority etc.<br>ID auto: <span class="tag">IPL-0001</span>`,se:['Search patient?','Edit patient?'],sh:['Patient search?','Patient edit?']},
+  {tags:['report','result','entry','report entry','result daalo','bharo'],en:`<strong>Report Entry:</strong><br><strong>1.</strong> Booking Detail → Entry button<br><strong>2.</strong> Enter values for each parameter<br><strong>3.</strong> Flags auto-set: <span class="tag">High</span> <span class="tag">Low</span> <span class="tag">Normal</span><br><strong>4.</strong> Save → Finalize<br><br><strong>✏️ Edit Parameter:</strong> Click the pencil ✏️ icon next to any parameter row to change its name, unit, or reference range on the fly.`,hi:`<strong>Report Entry:</strong><br><strong>1.</strong> Booking Detail → Entry button<br><strong>2.</strong> Har parameter ki value daalo<br><strong>3.</strong> Auto flag: <span class="tag">High</span> <span class="tag">Low</span> <span class="tag">Normal</span><br><strong>4.</strong> Save → Finalize<br><br><strong>✏️ Parameter Edit:</strong> Kisi bhi parameter ke samne ✏️ pencil icon dabao — naam, unit, ya reference range turant badlo.`,se:['Edit parameter range?','Report PDF?','What is finalize?','Direct print?'],sh:['Parameter edit kaise?','Report PDF?','Finalize kya hai?','Direct print?']},
+  {tags:['finalize','final','lock','confirm report'],en:`<strong>Finalize Report:</strong> Locks the report. Patient can see it in My Reports portal. Only Admin can un-finalize.`,hi:`<strong>Finalize:</strong> Report lock ho jaati hai. Patient My Reports mein dekh sakta hai. Sirf Admin unlock kar sakta hai.`,se:['Report entry?','Report PDF?'],sh:['Report entry?','Report PDF?']},
+  {tags:['report pdf','pdf','print report','nikalo','download report','direct print','margin','zero margin'],en:`<strong>Report PDF/Print — 2 Modes:</strong><br><span class="tag">📄 PDF</span> Zero margins — best for WhatsApp/email sharing.<br><span class="tag">🖨 Direct Print</span> With margins (top 100px, bottom 96px) — for physical printing on letterhead paper.<br><br><strong>Single:</strong> Report View → choose button<br><strong>Bulk:</strong> Reports list → checkboxes → Bulk PDF/Print`,hi:`<strong>Report PDF/Print — 2 Modes:</strong><br><span class="tag">📄 PDF</span> Zero margin — WhatsApp/email share ke liye best.<br><span class="tag">🖨 Direct Print</span> Margin ke saath (top 100px, bottom 96px) — letterhead paper pe print ke liye.<br><br><strong>Single:</strong> Report View → button chuno<br><strong>Bulk:</strong> Reports list → checkboxes → Bulk PDF/Print`,se:['Bulk print?','Edit parameter?','Lab settings?'],sh:['Bulk print?','Parameter edit?','Lab settings?']},
+  {tags:['test','tests','test master','category','sample type'],en:`<strong>Test Master</strong> <span class="url">/tests/</span><br>Each test: Name, Category, Sample, Price, TAT<br>Categories: Haematology, Biochemistry, Serology, Clinical Pathology, Histopathology, Hormones<br>Add <strong>Parameters</strong> with reference ranges per test.`,hi:`<strong>Test Master</strong> <span class="url">/tests/</span><br>Har test: Naam, Category, Sample, Price, TAT<br>Categories: Haematology, Biochemistry, Serology, Clinical Pathology, Histopathology, Hormones<br>Har test ke andar <strong>Parameters</strong> bhi set karo.`,se:['Set parameters?','Rate list?','Test note?'],sh:['Parameters kaise set kare?','Rate list?','Test note?']},
+  {tags:['rate list','price list','rate','charges','fees'],en:`<strong>Rate List</strong> <span class="url">/rate-list/</span><br>All test prices by category. Has search bar 🔍 and Print button. Visible to all users.`,hi:`<strong>Rate List</strong> <span class="url">/rate-list/</span><br>Saari tests ki price category-wise. Search bar 🔍 aur Print available. Sab dekh sakte hain.`,se:['Change price?','Test master?'],sh:['Price kaise change kare?','Test master?']},
+  {tags:['settings','lab settings','branding','lab name','logo','customize','setting','footer image','header image','technician','staff name','doctor name','signer','naam change','designation'],en:`<strong>Lab Settings</strong> <span class="url">/settings/</span><br><ul><li>Lab Name, Tagline, Email, Phone, Address</li><li>Logo & Custom <strong>Header Image</strong> upload</li><li>Custom <strong>Footer Image</strong> upload</li><li>4 Staff/Doctor Names & Designations (editable)</li><li>4 Signature image uploads</li><li>PDF Footer text, Timing bar, Facilities text</li></ul>⚠️ Admin only.`,hi:`<strong>Lab Settings</strong> <span class="url">/settings/</span><br><ul><li>Lab Naam, Tagline, Email, Phone, Address</li><li>Logo & Custom <strong>Header Image</strong> upload</li><li>Custom <strong>Footer Image</strong> upload</li><li>4 Staff/Doctor ke Naam & Designation (edit ho sakte hain)</li><li>4 Signature images</li><li>PDF Footer, Timing bar, Facilities text</li></ul>⚠️ Sirf Admin.`,se:['Upload header image?','Upload footer image?','Change staff names?','Add signature?'],sh:['Header image upload?','Footer image upload?','Staff naam kaise badle?','Signature add?']},
+  {tags:['staff name','technician name','doctor name','signer name','naam','designation','footer image','header image upload','signature name'],en:`<strong>Change Staff Names & Designations:</strong><br>Go to <span class="url">/settings/</span> → scroll to <strong>👨‍⚕️ Technician / Staff Names</strong> section.<br>Edit all 4 staff names & their designations. Click <strong>Save All Settings</strong>.<br><br><strong>Footer Image:</strong> Settings → <strong>🖼️ Footer Image</strong> section → upload.<br><strong>Header Image:</strong> Settings → Logo & Letterhead → upload.`,hi:`<strong>Staff Naam & Designation Kaise Badle:</strong><br><span class="url">/settings/</span> jao → neeche <strong>👨‍⚕️ Technician / Staff Names</strong> section mein jao.<br>Charo staff ke naam aur designation edit karo. <strong>Save All Settings</strong> dabao.<br><br><strong>Footer Image:</strong> Settings → <strong>🖼️ Footer Image</strong> section → upload karo.<br><strong>Header Image:</strong> Settings → Logo & Letterhead → upload karo.`,se:['Edit parameter?','Lab settings?','Upload logo?'],sh:['Parameter edit?','Lab settings?','Logo upload?']},
+  {tags:['search','advanced search','dhundho','khojo','find'],en:`<strong>Advanced Search</strong> <span class="url">/search/</span><br>Search Patients, Reports, and Tests from one place. Date range filter also available.`,hi:`<strong>Advanced Search</strong> <span class="url">/search/</span><br>Patients, Reports, aur Tests ek jagah se search karo. Date filter bhi hai.`,se:['Search patient?','Filter reports?'],sh:['Patient search?','Reports filter?']},
+  {tags:['offline','internet','server','run','start','chalu','runserver','chal'],en:`<strong>Run Offline:</strong><br><span class="url">python manage.py runserver</span><br>Browser: <span class="url">http://127.0.0.1:8000</span><br><br>Mobile (same WiFi):<br><span class="url">python manage.py runserver 0.0.0.0:8000</span><br>✅ No internet needed.`,hi:`<strong>Offline Chalao:</strong><br><span class="url">python manage.py runserver</span><br>Browser: <span class="url">http://127.0.0.1:8000</span><br><br>Mobile (same WiFi):<br><span class="url">python manage.py runserver 0.0.0.0:8000</span><br>✅ Internet zaruri nahi.`,se:['How to install?','Database info?'],sh:['Install kaise kare?','Database kya hai?']},
+  {tags:['install','setup','pip','migrate','seed'],en:`<strong>Install Steps:</strong><br><strong>1.</strong> <span class="url">pip install -r requirements.txt</span><br><strong>2.</strong> <span class="url">python manage.py migrate</span><br><strong>3.</strong> <span class="url">python manage.py seed_data</span><br><strong>4.</strong> <span class="url">python manage.py createsuperuser</span><br><strong>5.</strong> <span class="url">python manage.py runserver</span>`,hi:`<strong>Install Steps:</strong><br><strong>1.</strong> <span class="url">pip install -r requirements.txt</span><br><strong>2.</strong> <span class="url">python manage.py migrate</span><br><strong>3.</strong> <span class="url">python manage.py seed_data</span><br><strong>4.</strong> <span class="url">python manage.py createsuperuser</span><br><strong>5.</strong> <span class="url">python manage.py runserver</span>`,se:['Run software?','Database?'],sh:['Software chalao?','Database?']},
+  {tags:['theme','dark','light','color','rang','appearance'],en:`<strong>Change Theme:</strong> Click 🎨 Theme button (top right).<br><br>Available: <span class="tag">Dark</span> <span class="tag">Light</span> <span class="tag">System</span> <span class="tag">Midnight Blue</span> <span class="tag">Forest Green</span> <span class="tag">Sunset Orange</span>`,hi:`<strong>Theme Change:</strong> Upar right corner mein 🎨 Theme button dabao.<br><br>Available: <span class="tag">Dark</span> <span class="tag">Light</span> <span class="tag">System</span> <span class="tag">Midnight Blue</span> <span class="tag">Forest Green</span> <span class="tag">Sunset Orange</span>`,se:['How to login?','How to use chatbot?'],sh:['Login?','Chatbot kaise use kare?']},
+  {tags:['hello','hi','hey','namaste','namaskar','salaam','hii'],en:`Hello! 👋 I'm <strong>IPL Assistant</strong>.<br>I only know about <strong>Indian Path-Lab LMS</strong> software.<br>What would you like to know?`,hi:`Namaste! 🙏 Main <strong>IPL Assistant</strong> hoon.<br>Main sirf <strong>Indian Path-Lab LMS</strong> software ke baare mein jaanta hoon.<br>Kya jaanna chahte ho?`,se:['Create booking?','Enter report?','Lab settings?','Run software?'],sh:['Booking kaise?','Report entry?','Lab settings?','Software chalao?']},
+  {tags:['thanks','thank','shukriya','dhanyawad','theek','ok','accha','samajh'],en:`You're welcome! 😊 Ask anything else about the software.`,hi:`Khushi hui! 😊 Koi aur sawaal ho toh zaroor poochho.`,se:['Create booking?','Print report?'],sh:['Booking?','Report print?']},
+  {tags:['parameter','param','range','edit param','galat','lower limit','upper limit','unit change','naam change','pencil'],en:`<strong>Edit Parameter (on-the-fly):</strong><br><strong>1.</strong> Go to Report Entry page<br><strong>2.</strong> Click the ✏️ pencil icon on any parameter row<br><strong>3.</strong> A popup opens — change:<br>&nbsp;&nbsp;• Parameter Name<br>&nbsp;&nbsp;• Unit<br>&nbsp;&nbsp;• Lower Limit<br>&nbsp;&nbsp;• Upper Limit<br><strong>4.</strong> Click <strong>Save</strong> — row updates instantly, flag recalculates.<br><br><span class="tag">Note</span> This changes the result for this report only. To change globally, edit Test Parameters in <span class="url">/tests/</span>`,hi:`<strong>Parameter Edit Kaise Kare:</strong><br><strong>1.</strong> Report Entry page pe jao<br><strong>2.</strong> Jo parameter galat hai uske samne ✏️ pencil icon dabao<br><strong>3.</strong> Popup khulega — yahan change karo:<br>&nbsp;&nbsp;• Parameter Ka Naam<br>&nbsp;&nbsp;• Unit<br>&nbsp;&nbsp;• Lower Limit<br>&nbsp;&nbsp;• Upper Limit<br><strong>4.</strong> Save dabao — row turant update ho jayega, flag bhi badlega.<br><br><span class="tag">Note</span> Ye sirf is report ke liye badlega. Sab reports ke liye globally change karne ke liye <span class="url">/tests/</span> mein jao.`,se:['Report entry?','Test parameters?','Finalize?'],sh:['Report entry?','Test parameters?','Finalize kya hai?']},
+  {tags:['__default__'],en:`Sorry, I only know about <strong>Indian Path-Lab LMS</strong>. Please choose a topic:`,hi:`Mujhe samajh nahi aaya. Main sirf <strong>Indian Path-Lab LMS</strong> ke baare mein jaanta hoon:`,se:['Create booking?','Report entry?','Lab settings?','Run software?','Test master?'],sh:['Booking?','Report entry?','Lab settings?','Software chalao?','Test master?']}
+];
+
+// Theme is managed globally by base.html
+
+const ca=document.getElementById('chatArea'),ib=document.getElementById('inputBox'),sg=document.getElementById('suggestions');
+
+function norm(t){return t.toLowerCase().replace(/[?!.,;:]/g,'').replace(/\s+/g,' ').trim();}
+function find(q){
+  const nq=norm(q),ws=nq.split(' ');
+  let best=null,bs=0;
+  for(const it of KB){
+    if(it.tags[0]==='__default__')continue;
+    let s=0;
+    for(const tg of it.tags){if(nq.includes(tg))s+=tg.length*2;for(const w of ws)if(tg.includes(w)&&w.length>2)s+=w.length;}
+    if(s>bs){bs=s;best=it;}
+  }
+  return bs<3?KB.find(k=>k.tags[0]==='__default__'):best;
+}
+function addMsg(html,isUser){
+  const w=document.createElement('div');w.className='msg '+(isUser?'user':'bot');
+  const av=document.createElement('div');av.className='msg-av';av.textContent=isUser?'👤':'🔬';
+  const b=document.createElement('div');b.className='msg-bubble';
+  if(isUser)b.textContent=html;else b.innerHTML=html;
+  w.appendChild(av);w.appendChild(b);ca.appendChild(w);ca.scrollTop=ca.scrollHeight;
+}
+function showTyping(){
+  const w=document.createElement('div');w.className='typing-wrap';w.id='typ';
+  const av=document.createElement('div');av.className='msg-av';av.textContent='🔬';
+  const t=document.createElement('div');t.className='typing';t.innerHTML='<span></span><span></span><span></span>';
+  w.appendChild(av);w.appendChild(t);ca.appendChild(w);ca.scrollTop=ca.scrollHeight;
+}
+function removeTyping(){const t=document.getElementById('typ');if(t)t.remove();}
+function setSugg(items){
+  sg.innerHTML='';if(!items||!items.length)return;
+  items.forEach(s=>{const b=document.createElement('button');b.className='sug-btn';b.textContent=s;b.onclick=()=>{ib.value=s;sendMsg();};sg.appendChild(b);});
+}
+function sendMsg(){
+  const txt=ib.value.trim();if(!txt)return;
+  ib.value='';ib.style.height='auto';setSugg([]);addMsg(txt,true);showTyping();
+  setTimeout(()=>{
+    removeTyping();
+    const lang=detectLang(txt);
+    const res=find(txt);
+    addMsg(res[lang]||res.en,false);
+    setSugg(lang==='hi'?(res.sh||res.se):(res.se||res.sh));
+  },350+Math.random()*300);
+}
+ib.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';});
+ib.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    addMsg(`Hello! 👋 I'm <strong>IPL Assistant</strong> — Indian Path-Lab LMS help bot.<br>I can guide you about this software. What would you like to know?`,false);
+    setSugg(['How to create booking?','How to enter report?','Lab settings?','Run software offline?','Test master?']);
+  },300);
+});
+</script>
+</body>
+</html>

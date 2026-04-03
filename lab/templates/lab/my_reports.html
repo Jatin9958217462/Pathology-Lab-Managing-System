@@ -1,0 +1,42 @@
+{% extends 'lab/base.html' %}
+{% block title %}My Reports — Indian Path-Lab{% endblock %}
+{% block page_title %}My Reports{% endblock %}
+{% block content %}
+<div style="background:linear-gradient(135deg,#0d2137,#0a1f2e,var(--bg3));border:1px solid var(--border);border-radius:var(--r2);padding:18px 22px;margin-bottom:16px">
+  <div style="font-family:var(--display);font-size:18px;font-weight:700;color:var(--txt);margin-bottom:4px">
+    👤 Welcome{% if patient %}, {{ patient.full_name }}{% endif %}
+  </div>
+  <div style="font-size:12px;color:var(--txt2)">
+    {% if patient %}
+    Patient ID: <span class="mono">{{ patient.patient_id }}</span> &nbsp;·&nbsp; {{ patient.age }} yrs / {{ patient.gender }} &nbsp;·&nbsp; {{ patient.mobile }}
+    {% else %}Your account is not linked to a patient record. Please contact the lab staff.{% endif %}
+  </div>
+</div>
+{% if not patient %}
+<div class="card" style="text-align:center;padding:40px;color:var(--txt3)">
+  <div style="font-size:40px;margin-bottom:12px">🔗</div>
+  <div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:8px">Account Not Linked</div>
+  <div>Visit the lab and ask staff to link your account <strong style="color:var(--teal)">{{ request.user.username }}</strong> to your patient record.</div>
+</div>
+{% elif not reports %}
+<div class="card" style="text-align:center;padding:40px;color:var(--txt3)">No reports available yet. Your finalized reports will appear here.</div>
+{% else %}
+<div style="display:flex;flex-direction:column;gap:10px">
+{% for rpt in reports %}
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+  <div style="flex:1">
+    <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:3px">{{ rpt.test.name }}</div>
+    <div style="font-size:11px;color:var(--txt3)">Report ID: <span class="mono">{{ rpt.report_id }}</span> &nbsp;·&nbsp; Date: {{ rpt.report_date|date:"d M Y" }}{% if rpt.booking.ref_doctor %} &nbsp;·&nbsp; Dr. {{ rpt.booking.ref_doctor.name }}{% endif %}</div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+    <span class="badge b-green">✓ Ready</span>
+    <div style="display:flex;gap:6px">
+      <a href="{% url 'report_view' rpt.pk %}" class="btn btn-secondary btn-xs">View</a>
+      <a href="{% url 'report_pdf' rpt.pk %}" target="_blank" class="btn btn-blue btn-xs">⬇ Download PDF</a>
+    </div>
+  </div>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+{% endblock %}

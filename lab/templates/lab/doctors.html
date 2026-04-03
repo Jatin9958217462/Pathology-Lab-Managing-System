@@ -1,0 +1,57 @@
+{% extends 'lab/base.html' %}
+{% block title %}Doctors — Indian Path-Lab{% endblock %}
+{% block page_title %}Doctor Management{% endblock %}
+{% block topbar_actions %}
+{% if user_role == 'admin' or user_role == 'staff' %}
+<button class="btn btn-primary btn-sm" onclick="openModal('modal-add-doc')">+ Add Doctor</button>
+{% endif %}
+{% endblock %}
+{% block content %}
+{% if not doctors %}
+<div class="card" style="text-align:center;padding:40px;color:var(--txt3)">No doctors added yet.</div>
+{% else %}
+<div class="grid3">
+{% for doc in doctors %}
+<div class="card" style="padding:16px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px">
+    <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0">{{ doc.name.0 }}{% with s=doc.name|slice:"1:" %}{{ s.0 }}{% endwith %}</div>
+    <div><div style="font-size:13px;font-weight:700;color:var(--txt)">{{ doc.name }}</div><div style="font-size:10px;color:var(--txt3)">{{ doc.qualification }}{% if doc.specialization %} · {{ doc.specialization }}{% endif %}</div></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--txt2);margin-bottom:10px">
+    {% if doc.mobile %}<div>📱 {{ doc.mobile }}</div>{% endif %}
+    {% if doc.hospital %}<div>🏥 {{ doc.hospital }}</div>{% endif %}
+  </div>
+  <div style="display:flex;align-items:center;gap:6px">
+    <span class="badge b-teal">{{ doc.doc_id }}</span>
+    {% if user_role == 'admin' %}
+    <form method="post" action="{% url 'doctor_delete' doc.pk %}" style="margin-left:auto" onsubmit="return confirm('Delete Dr. {{ doc.name }}?')">{% csrf_token %}<button type="submit" class="btn btn-danger btn-xs">Delete</button></form>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+{% if user_role == 'admin' or user_role == 'staff' %}
+<div class="mover" id="modal-add-doc">
+  <div class="mbox">
+    <div class="mhd"><div class="mtitle">Add Referring Doctor</div><button class="mclose" onclick="closeModal('modal-add-doc')">×</button></div>
+    <form method="post" action="{% url 'doctor_add' %}">{% csrf_token %}
+      <div class="mbody">
+        <div class="frow"><div class="fg"><label class="fl">Doctor Name <span class="req">*</span></label><input class="fc" name="name" required></div><div class="fg"><label class="fl">Qualification</label><input class="fc" name="qualification" placeholder="MBBS, MD"></div></div>
+        <div class="frow"><div class="fg"><label class="fl">Specialization</label><input class="fc" name="specialization"></div><div class="fg"><label class="fl">Mobile <span class="req">*</span></label><input class="fc" name="mobile" required></div></div>
+        <div class="frow"><div class="fg"><label class="fl">Email</label><input class="fc" name="email" type="email"></div><div class="fg"><label class="fl">Hospital</label><input class="fc" name="hospital"></div></div>
+        <div class="fg"><label class="fl">Address</label><input class="fc" name="address"></div>
+      </div>
+      <div class="mfoot"><button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-doc')">Cancel</button><button type="submit" class="btn btn-primary">Save Doctor</button></div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block extra_js %}
+<script>
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.mover').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+</script>
+{% endblock %}
